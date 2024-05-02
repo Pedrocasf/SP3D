@@ -19,17 +19,17 @@ Once in the `SpinalTemplateSbt` directory, when tools are installed, the command
 
 ```sh
 // To generate the Verilog from the example
-sbt "runMain projectname.MyTopLevelVerilog"
+sbt "runMain SP3D.MyTopLevelVerilog"
 
 // To generate the VHDL from the example
-sbt "runMain projectname.MyTopLevelVhdl"
+sbt "runMain SP3D.MyTopLevelVhdl"
 
 // To run the testbench
-sbt "runMain projectname.MyTopLevelSim"
+sbt "runMain SP3D.MyTopLevelSim"
 ```
 
-* The example hardware description is into `hw/spinal/projectname/MyTopLevel.scala`
-* The testbench is into `hw/spinal/projectname/MyTopLevelSim.scala`
+* The example hardware description is into `hw/spinal/SP3D/MyTopLevel.scala`
+* The testbench is into `hw/spinal/SP3D/MyTopLevelSim.scala`
 
 When you really start working with SpinalHDL, it is recommended (both for comfort and efficiency) to use an IDE, see the [Getting started](https://spinalhdl.github.io/SpinalDoc-RTD/master/SpinalHDL/Getting%20Started/index.html).
 
@@ -38,13 +38,13 @@ When you really start working with SpinalHDL, it is recommended (both for comfor
 
 ### Change project name
 
-You might want to change the project name, which is currently `projectname`. To do so (let's say your actual project name is `myproject`; it must be all lowercase with no separators):
+You might want to change the project name, which is currently `SP3D`. To do so (let's say your actual project name is `myproject`; it must be all lowercase with no separators):
 
-* Update `build.sbt` and/or `build.sc` by replacing `projectname` by the name of your project `myproject` (1 occurrence in each file). The better is to replace in both (it will always work), but in some contexts you can keep only one of these two files:
+* Update `build.sbt` and/or `build.sc` by replacing `SP3D` by the name of your project `myproject` (1 occurrence in each file). The better is to replace in both (it will always work), but in some contexts you can keep only one of these two files:
     * If you are sure all people only use `sbt`, you can replace only in `build.sbt` and remove `build.sc`
     * If you are sure all people only use `mill`, you can replace only in `build.sc` and remove `build.sbt`
     * Replace in both files for open-source project.
-* Put all your scala files into `hw/spinal/myproject/` (remove the unused `hw/spinal/projectname/` folder)
+* Put all your scala files into `hw/spinal/myproject/` (remove the unused `hw/spinal/SP3D/` folder)
 * Start all your scala files with `package myproject`
 
 
@@ -59,7 +59,7 @@ You can change the project structure as you want. The only restrictions (from Sc
 Once the project structure is modified, update configurations:
 
 * In `build.sbt` and/or `build.sc` (see above) replace `/ "hw" / "spinal"` by the new path to the folder containing the `myproject` folder.
-* In the spinal configuration file (if you kept it, by default it is in `projectname/Config.scala`) change the path in `targetDirectory = "hw/gen"` to the directory where you want generated files to be written. If you don't use a config or if it doesn't contain this element, generated files will be written in the root directory.
+* In the spinal configuration file (if you kept it, by default it is in `SP3D/Config.scala`) change the path in `targetDirectory = "hw/gen"` to the directory where you want generated files to be written. If you don't use a config or if it doesn't contain this element, generated files will be written in the root directory.
 
 
 ### Update this README
@@ -73,11 +73,11 @@ The [Mill build tool](https://com-lihaoyi.github.io/mill) can be installed and u
 
 ```sh
 // To generate the Verilog from the example
-mill projectname.runMain projectname.MyTopLevelVerilog
+mill SP3D.runMain SP3D.MyTopLevelVerilog
 
 // To generate the VHDL from the example
-mill projectname.runMain projectname.MyTopLevelVhdl
+mill SP3D.runMain SP3D.MyTopLevelVhdl
 
 // To run the testbench
-mill projectname.runMain projectname.MyTopLevelSim
+mill SP3D.runMain SP3D.MyTopLevelSim
 ```

@@ -1,4 +1,4 @@
-package projectname
+package SP3D
 
 import spinal.core._
 import spinal.core.sim._
