@@ -1,0 +1,3 @@
+[submodule "sw/ZigRV32I-for-Fantasy-Console"]
+	path = sw/ZigRV32I-for-Fantasy-Console
+	url = https://github.com/Pedrocasf/ZigRV32I-for-Fantasy-Console.git
