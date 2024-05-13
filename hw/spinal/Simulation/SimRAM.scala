@@ -21,7 +21,7 @@ case class SimRAM (RAMSize:BigInt) extends Component{
       memory(io.bus.cmd.address) := io.bus.cmd.data
     }otherwise {
       io.bus.rsp.valid := True
-      io.bus.rsp.payload.data := memory(io.bus.cmd.address)
+      io.bus.rsp.payload.data := memory.readSync(io.bus.cmd.address)
     }
   }otherwise{
     io.bus.rsp.valid := False

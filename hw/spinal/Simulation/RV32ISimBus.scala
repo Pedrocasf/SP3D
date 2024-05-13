@@ -24,3 +24,4 @@ case class RV32ISimBus (ADDR_WIDTH:Int = 25, RDCYCLES_WIDTH:Int = 32, RESET_ADDR
   busInterconnect.addConnection(cpu.io.bus, spram.io.bus)
   busInterconnect.perfConfig()
 }
+

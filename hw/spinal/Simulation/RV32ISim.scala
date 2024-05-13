@@ -10,7 +10,7 @@ object RV32ISim extends App {
     val instr = dut.cpu.instr.toLong
     print("pc: ", pc.toHexString, '\n')
     print("instr: ", instr.toHexString, '\n')
-    while(!dut.cpu.unknownInstr.toBoolean){
+    while(!dut.cpu.isStop.toBoolean){
       dut.clockDomain.waitRisingEdge()
       val pc = dut.cpu.pc.toLong
       val instr = dut.cpu.instr.toLong
