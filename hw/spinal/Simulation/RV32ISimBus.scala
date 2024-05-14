@@ -2,6 +2,7 @@ package Simulation
 
 import RV32I.RV32IBiCycle
 import spinal.core._
+import spinal.core.sim.SimDataPimper
 import spinal.lib._
 import spinal.lib.bus.misc.SizeMapping
 import spinal.lib.bus.simple._
@@ -11,6 +12,7 @@ import scala.language.postfixOps
 case class RV32ISimBus (ADDR_WIDTH:Int = 25, RDCYCLES_WIDTH:Int = 32, RESET_ADDR:Int = 0x00000000, FILE_SIZE:BigInt, FILE_PATH:String, ROM_SIZE:BigInt = 16 MiB, RAM_SIZE:BigInt = 8 MiB, SPRAM_SIZE:BigInt = 128 KiB) extends Component{
   val io = new Bundle{}
   val cpu = RV32IBiCycle(ADDR_WIDTH,RDCYCLES_WIDTH,RESET_ADDR)
+  cpu.io.bus.cmd.payload.address.simPublic()
   val flash = SimROM(FILE_SIZE, FILE_PATH)
   val psram = SimRAM(RAM_SIZE)
   val spram = SimRAM(SPRAM_SIZE)

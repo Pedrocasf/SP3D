@@ -13,8 +13,8 @@ case class RV32IBiCycle (ADDR_WIDTH:Int = 25, RDCYCLES_WIDTH:Int = 32, RESET_ADD
   val io = new Bundle{
     val bus = master(PipelinedMemoryBus(ADDR_WIDTH, 32))
   }
-  val pc = Reg(UInt(ADDR_WIDTH bits)) init RESET_ADDR
-  val instr = Reg(Bits(32 bits)) init 0
+  val pc = (Reg(UInt(ADDR_WIDTH bits)) init RESET_ADDR).simPublic()
+  val instr = (Reg(Bits(32 bits)) init 0).simPublic()
   val rdId:UInt = instr(11 downto 7).asUInt
   val funct3Is:Bits = B(1) << U(instr(14 downto 12))
   val UImm = B(21 bits, default -> instr(31)) ## instr(30 downto 20)
@@ -33,12 +33,13 @@ case class RV32IBiCycle (ADDR_WIDTH:Int = 25, RDCYCLES_WIDTH:Int = 32, RESET_ADD
   val isStore  = instr(6 downto 2) === B"01000"
   val isSystem = instr(6 downto 2) === B"11100"
   val isStop   = instr(6 downto 2) === B"00011"
+  isStop.simPublic()
   val isALU = isALUimm | isALUreg
   val writeBack = Bool()
   val writeBackData = UInt(32 bits)
   val rs1 = Reg(Bits(32 bits)) init 0
   val rs2 = Reg(Bits(32 bits)) init 0
-  val registerFile = Mem(Bits(32 bits), 32) init Seq.fill(32)(B"0")//(1 to 32).map(_ => B"0")
+  val registerFile = Mem(Bits(32 bits), 32) init Seq.fill(32)(B"0")
   registerFile.write(rdId, B(writeBackData), writeBack && rdId =/= 0)
   val aluIn1 = rs1
   val aluIn2 = Mux(isALUreg | isBranch, rs2, IImm)
@@ -97,7 +98,7 @@ case class RV32IBiCycle (ADDR_WIDTH:Int = 25, RDCYCLES_WIDTH:Int = 32, RESET_ADD
         Mux(loadstore_addr(1), B"1100", B"0011"),
   B"1111"))
   val fsm = new StateMachine {
-    val WAIT_INSTR:State = new State {
+    val WAIT_INSTR:State with EntryPoint = new State with EntryPoint {
       whenIsActive {
         rs1 := registerFile.readSync(U(io.bus.rsp.payload.data(19 downto 15)), io.bus.rsp.fire)
         rs2 := registerFile.readSync(U(io.bus.rsp.payload.data(24 downto 20)), io.bus.rsp.fire)
@@ -117,21 +118,27 @@ case class RV32IBiCycle (ADDR_WIDTH:Int = 25, RDCYCLES_WIDTH:Int = 32, RESET_ADD
         }
       }
     }
-    val WAIT_MEM:State with EntryPoint= new State with EntryPoint {
+    val WAIT_MEM:State = new State {
       whenIsActive {
         when(io.bus.rsp.fire) {
-          goto(WAIT_INSTR)
+          goto(FETCH_INSTR)
         }
+      }
+    }
+    val FETCH_INSTR:State = new State{
+      whenIsActive{
+        goto(WAIT_INSTR)
       }
     }
     val wait_instr_state = this.isActive(WAIT_INSTR)
     val execute_state = this.isActive(EXECUTE)
     val wait_mem_state = this.isActive(WAIT_MEM)
-    io.bus.cmd.address <> Mux(wait_instr_state, pc, Mux(execute_state & !isLoad & !isStore, PC_new, loadstore_addr))
-    writeBack := !(isBranch | isStore) & (execute_state | wait_mem_state)
-    io.bus.cmd.mask <> Mux(isStore, B(4 bits, default -> (execute_state & isStore)) & STORE_wmask, B"1111")
-    io.bus.cmd.write <> (isStore & execute_state)
-    io.bus.cmd.valid <> ((wait_instr_state || (execute_state && (isLoad | isStore))) & !wait_mem_state)
+    val fetch_instr_state = this.isActive(FETCH_INSTR)
+    io.bus.cmd.address \ Mux(wait_instr_state | fetch_instr_state, pc, Mux(execute_state & !isLoad & !isStore, PC_new, loadstore_addr))
+    writeBack \ !(isBranch | isStore) & (execute_state | wait_mem_state)
+    io.bus.cmd.mask \ Mux(isStore, B(4 bits, default -> (execute_state & isStore)) & STORE_wmask, B"1111")
+    io.bus.cmd.write \ (isStore & execute_state)
+    io.bus.cmd.valid \ execute_state & !isStore | fetch_instr_state
   }
     writeBackData :=
       Mux(isSystem, cycles, U(0)) |
